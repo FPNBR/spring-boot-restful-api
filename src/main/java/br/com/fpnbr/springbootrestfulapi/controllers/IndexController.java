@@ -37,4 +37,11 @@ public class IndexController {
 
         return new ResponseEntity<>(usuario, HttpStatus.CREATED);
     }
+
+    @PutMapping(value = "/", produces = "application/json")
+    public ResponseEntity<Usuario> atualizar(@RequestBody Usuario usuario) {
+        Usuario usuarioSalvo = usuarioRepository.save(usuario);
+
+        return new ResponseEntity<>(usuario, HttpStatus.CREATED);
+    }
 }
