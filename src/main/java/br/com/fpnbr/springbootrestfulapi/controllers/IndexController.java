@@ -5,10 +5,7 @@ import br.com.fpnbr.springbootrestfulapi.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,5 +29,12 @@ public class IndexController {
        Optional<Usuario> usuario = usuarioRepository.findById(id);
 
         return new ResponseEntity<>(usuario.get(), HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/", produces = "application/json")
+    public ResponseEntity<Usuario> cadastrar(@RequestBody Usuario usuario) {
+        Usuario usuarioSalvo = usuarioRepository.save(usuario);
+
+        return new ResponseEntity<>(usuario, HttpStatus.CREATED);
     }
 }
