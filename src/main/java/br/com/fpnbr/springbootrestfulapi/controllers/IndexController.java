@@ -25,7 +25,6 @@ public class IndexController {
 
     @GetMapping(value = "/{id}", produces = "application/json")
     public ResponseEntity<Usuario> init(@PathVariable (value = "id") Long id) {
-
        Optional<Usuario> usuario = usuarioRepository.findById(id);
 
         return new ResponseEntity<>(usuario.get(), HttpStatus.OK);
@@ -43,5 +42,17 @@ public class IndexController {
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
 
         return new ResponseEntity<>(usuario, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping(value = "/{id}", produces = "application/json")
+    public ResponseEntity<Usuario> deletar(@PathVariable Long id) {
+        Optional<Usuario> usuario = usuarioRepository.findById(id);
+
+        if (usuario.isPresent()) {
+            usuarioRepository.deleteById(id);
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
