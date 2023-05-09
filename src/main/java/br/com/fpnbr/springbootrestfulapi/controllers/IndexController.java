@@ -24,7 +24,7 @@ public class IndexController {
     }
 
     @GetMapping(value = "/{id}", produces = "application/json")
-    public ResponseEntity<Usuario> init(@PathVariable (value = "id") Long id) {
+    public ResponseEntity<Usuario> buscar(@PathVariable (value = "id") Long id) {
        Optional<Usuario> usuario = usuarioRepository.findById(id);
 
         return new ResponseEntity<>(usuario.get(), HttpStatus.OK);
@@ -43,6 +43,10 @@ public class IndexController {
 
     @PutMapping(value = "/", produces = "application/json")
     public ResponseEntity<Usuario> atualizar(@RequestBody Usuario usuario) {
+        for (int i = 0; i < usuario.getTelefones().size(); i++) {
+            usuario.getTelefones().get(i).setUsuario(usuario);
+        }
+
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
 
         return new ResponseEntity<>(usuario, HttpStatus.CREATED);
