@@ -16,7 +16,6 @@ public class IndexController {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    @CrossOrigin(origins = "site1.com/")
     @GetMapping(value = "/", produces = "application/json")
     public ResponseEntity<List<Usuario>> usuario() {
         List<Usuario> usuarios = usuarioRepository.findAll();
@@ -24,7 +23,6 @@ public class IndexController {
         return new ResponseEntity<>(usuarios, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "site2.com/")
     @GetMapping(value = "/{id}", produces = "application/json")
     public ResponseEntity<Usuario> buscar(@PathVariable (value = "id") Long id) {
        Optional<Usuario> usuario = usuarioRepository.findById(id);
@@ -32,7 +30,6 @@ public class IndexController {
         return new ResponseEntity<>(usuario.get(), HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "localhost:8080")
     @PostMapping(value = "/", produces = "application/json")
     public ResponseEntity<Usuario> cadastrar(@RequestBody Usuario usuario) {
         for (int i = 0; i < usuario.getTelefones().size(); i++) {
