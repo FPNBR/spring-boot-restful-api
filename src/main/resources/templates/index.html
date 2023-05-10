@@ -12,10 +12,10 @@
     $(document).ready (
         function() {
             $.ajax({
-                url : "https://projeto-springrestful-production.up.railway.app/usuario/",
+                url : "https://projeto-spring-restful-production.up.railway.app/usuario/",
                 method: "GET"
             }).then(function(data, status, info) {
-
+                alert(data[1].telefones[0].numero);
             });
         }
     );
