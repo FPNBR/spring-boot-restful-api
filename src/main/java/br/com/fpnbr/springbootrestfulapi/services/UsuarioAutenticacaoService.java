@@ -5,6 +5,7 @@ import br.com.fpnbr.springbootrestfulapi.dto.JwtTokenDTO;
 import br.com.fpnbr.springbootrestfulapi.dto.UsuarioLoginDTO;
 import br.com.fpnbr.springbootrestfulapi.dto.UsuarioRegistroDTO;
 import br.com.fpnbr.springbootrestfulapi.enums.Role;
+import br.com.fpnbr.springbootrestfulapi.models.Telefone;
 import br.com.fpnbr.springbootrestfulapi.models.Usuario;
 import br.com.fpnbr.springbootrestfulapi.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UsuarioAutenticacaoService {
@@ -34,9 +39,17 @@ public class UsuarioAutenticacaoService {
                 .email(usuarioRegistroDTO.getEmail())
                 .senha(passwordEncoder.encode(usuarioRegistroDTO.getSenha()))
                 .role(Role.USER)
+                .telefones(new ArrayList<>())
                 .build();
 
+
+        List<Telefone> telefones = usuarioRegistroDTO.getTelefones().stream()
+                .map(telefoneDto -> Telefone.builder().numero(telefoneDto.getNumero()).usuario(usuario).build())
+                .collect(Collectors.toList());
+
+        usuario.setTelefones(telefones);
         usuarioRepository.save(usuario);
+
         var jwtToken = jwtService.generateToken(usuario);
 
         return JwtTokenDTO.builder()

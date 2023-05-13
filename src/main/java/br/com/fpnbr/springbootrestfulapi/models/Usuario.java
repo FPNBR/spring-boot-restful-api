@@ -1,6 +1,7 @@
 package br.com.fpnbr.springbootrestfulapi.models;
 
 import br.com.fpnbr.springbootrestfulapi.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +21,7 @@ import java.util.List;
 @Entity
 @Table(name = "usuario")
 @SequenceGenerator(name = "seq_usuario", sequenceName = "seq_usuario", allocationSize = 1, initialValue = 1)
+@JsonIgnoreProperties(value = {"role"}, allowGetters = true)
 public class Usuario implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_usuario")
@@ -32,6 +34,9 @@ public class Usuario implements UserDetails {
     private String email;
 
     private String senha;
+
+    @OneToMany(mappedBy = "usuario", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<Telefone> telefones;
 
     @Enumerated(EnumType.STRING)
     private Role role;
