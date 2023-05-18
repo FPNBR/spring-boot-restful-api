@@ -1,27 +1,27 @@
 package br.com.fpnbr.springbootrestfulapi.controllers;
 
 import br.com.fpnbr.springbootrestfulapi.dto.JwtTokenDTO;
+import br.com.fpnbr.springbootrestfulapi.dto.TelefoneDTO;
 import br.com.fpnbr.springbootrestfulapi.dto.UsuarioLoginDTO;
 import br.com.fpnbr.springbootrestfulapi.dto.UsuarioRegistroDTO;
-import br.com.fpnbr.springbootrestfulapi.models.Telefone;
-import br.com.fpnbr.springbootrestfulapi.models.Usuario;
 import br.com.fpnbr.springbootrestfulapi.repositories.TelefoneRepository;
 import br.com.fpnbr.springbootrestfulapi.repositories.UsuarioRepository;
-import br.com.fpnbr.springbootrestfulapi.services.UsuarioAutenticacaoService;
+import br.com.fpnbr.springbootrestfulapi.services.TelefoneService;
+import br.com.fpnbr.springbootrestfulapi.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
-
 @RestController
 @RequestMapping("/usuario")
 public class UsuarioController {
     @Autowired
-    private UsuarioAutenticacaoService usuarioAutenticacaoService;
+    private UsuarioService usuarioService;
+
+    @Autowired
+    private TelefoneService telefoneService;
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -32,104 +32,68 @@ public class UsuarioController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+
     @PostMapping("/")
-    public ResponseEntity<JwtTokenDTO> criarUsuario(@RequestBody UsuarioRegistroDTO usuarioRegistroDTO) {
-        return ResponseEntity.ok(usuarioAutenticacaoService.registro(usuarioRegistroDTO));
+    public ResponseEntity<UsuarioRegistroDTO> criarUsuario(@RequestBody UsuarioRegistroDTO usuarioRegistroDTO) {
+        UsuarioRegistroDTO usuarioCriado = usuarioService.criarUsuario(usuarioRegistroDTO);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(usuarioCriado);
     }
 
     @PostMapping("/login")
     public ResponseEntity<JwtTokenDTO> autenticarUsuario(@RequestBody UsuarioLoginDTO usuarioLoginDTO) {
-        return ResponseEntity.ok(usuarioAutenticacaoService.autenticar(usuarioLoginDTO));
-    }
 
-    @GetMapping("/")
-    public ResponseEntity<List<Usuario>> buscarTodosUsuarios() {
-        List<Usuario> usuarios = usuarioRepository.findAll();
-
-        return new ResponseEntity<>(usuarios, HttpStatus.OK);
+        return ResponseEntity.ok(usuarioService.autenticarUsuario(usuarioLoginDTO));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> buscarUsuario(@PathVariable (value = "id") Integer id) {
-        Optional<Usuario> usuario = usuarioRepository.findById(id);
+    public ResponseEntity<UsuarioRegistroDTO> buscarUsuarioPorId(@PathVariable Long id) {
+        UsuarioRegistroDTO usuario = usuarioService.buscarUsuarioPorId(id);
 
-        return new ResponseEntity<>(usuario.get(), HttpStatus.OK);
+        return ResponseEntity.ok(usuario);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> atualizarUsuario(@PathVariable Integer id, @RequestBody Usuario usuarioAtualizado) {
-        Optional<Usuario> usuarioExistente = usuarioRepository.findById(id);
+    public ResponseEntity<UsuarioRegistroDTO> atualizarUsuario(@PathVariable Long id, @RequestBody UsuarioRegistroDTO usuarioRegistroDTO) {
+        UsuarioRegistroDTO usuarioAtualizado = usuarioService.atualizarUsuario(id, usuarioRegistroDTO);
 
-        if (usuarioExistente.isPresent()) {
-            Usuario usuario = usuarioExistente.get();
-
-            usuario.setNome(usuarioAtualizado.getNome());
-            usuario.setSobrenome(usuarioAtualizado.getSobrenome());
-            usuario.setEmail(usuarioAtualizado.getEmail());
-            usuario.setSenha(passwordEncoder.encode(usuarioAtualizado.getSenha()));
-
-            Usuario usuarioSalvo = usuarioRepository.save(usuario);
-
-            return new ResponseEntity<>(usuarioSalvo, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return ResponseEntity.ok(usuarioAtualizado);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Usuario> deletarUsuario(@PathVariable Integer id) {
-        Optional<Usuario> usuario = usuarioRepository.findById(id);
+    public ResponseEntity<Void> deletarUsuario(@PathVariable Long id) {
+        usuarioService.deletarUsuario(id);
 
-        if (usuario.isPresent()) {
-            usuarioRepository.deleteById(id);
-
-            return ResponseEntity.ok().build();
-
-        }else {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{id}/telefone")
-    public ResponseEntity<Telefone> criarTelefone(@PathVariable Integer id, @RequestBody Telefone telefone) {
-        System.out.println("Usuario ID:" + id);
+    @PostMapping("/{usuarioId}/telefone")
+    public ResponseEntity<TelefoneDTO> criarTelefone(@PathVariable Long usuarioId, @RequestBody TelefoneDTO telefoneDTO) {
+        telefoneDTO.setUsuarioId(usuarioId);
+        TelefoneDTO telefoneCriado = telefoneService.criarTelefone(usuarioId, telefoneDTO);
 
-        Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
-
-        if (usuarioOptional.isPresent()) {
-            Usuario usuario = usuarioOptional.get();
-            telefone.setUsuario(usuario);
-            Telefone telefoneSalvo = telefoneRepository.save(telefone);
-            return new ResponseEntity<>(telefoneSalvo, HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(telefoneCriado);
     }
 
-    @PutMapping("/telefone/{id}")
-    public ResponseEntity<Telefone> atualizarTelefone(@PathVariable Integer id, @RequestBody Telefone telefoneAtualizado) {
-        Optional<Telefone> telefoneExistente = telefoneRepository.findById(id);
+    @GetMapping("/{usuarioId}/telefone/{telefoneId}")
+    public ResponseEntity<TelefoneDTO> buscarTelefone(@PathVariable Long usuarioId, @PathVariable Long telefoneId) {
+        TelefoneDTO telefoneDTO = telefoneService.buscarTelefone(usuarioId, telefoneId);
 
-        if (telefoneExistente.isPresent()) {
-            Telefone telefone = telefoneExistente.get();
-            telefone.setNumero(telefoneAtualizado.getNumero());
-            Telefone telefoneSalvo = telefoneRepository.save(telefone);
-
-            return new ResponseEntity<>(telefoneSalvo, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return ResponseEntity.ok(telefoneDTO);
     }
 
-    @DeleteMapping("/telefone/{id}")
-    public ResponseEntity<Void> excluirTelefone(@PathVariable Integer id) {
-        Optional<Telefone> telefoneExistente = telefoneRepository.findById(id);
+    @PutMapping("/{usuarioId}/telefone/{telefoneId}")
+    public ResponseEntity<TelefoneDTO> atualizarTelefone(@PathVariable Long usuarioId, @PathVariable Long telefoneId, @RequestBody TelefoneDTO telefoneDTO) {
+        telefoneDTO.setId(telefoneId);
+        TelefoneDTO telefoneAtualizado = telefoneService.atualizarTelefone(telefoneDTO, usuarioId);
 
-        if (telefoneExistente.isPresent()) {
-            telefoneRepository.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return ResponseEntity.ok(telefoneAtualizado);
+    }
+
+    @DeleteMapping("/{usuarioId}/telefone/{telefoneId}")
+    public ResponseEntity<Void> excluirTelefone(@PathVariable Long usuarioId, @PathVariable Long telefoneId) {
+        telefoneService.excluirTelefone(telefoneId, usuarioId);
+
+        return ResponseEntity.ok().build();
     }
 }

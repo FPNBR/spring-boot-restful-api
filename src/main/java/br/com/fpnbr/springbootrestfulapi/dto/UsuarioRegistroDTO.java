@@ -1,5 +1,7 @@
 package br.com.fpnbr.springbootrestfulapi.dto;
 
+import br.com.fpnbr.springbootrestfulapi.models.Telefone;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,9 +14,16 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UsuarioRegistroDTO {
+    private Long id;
+
     private String nome;
+
     private String sobrenome;
+
     private String email;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String senha;
-    private List<TelefoneDTO> telefones;
+
+    private List<Telefone> telefones;
 }

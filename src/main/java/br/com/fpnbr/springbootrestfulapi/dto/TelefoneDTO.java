@@ -7,8 +7,11 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class TelefoneDTO {
+    private Long id;
     private String numero;
+    private Long usuarioId;
 }
+

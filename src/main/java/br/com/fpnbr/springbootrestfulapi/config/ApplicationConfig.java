@@ -1,6 +1,7 @@
-package br.com.fpnbr.springbootrestfulapi.config.security;
+package br.com.fpnbr.springbootrestfulapi.config;
 
 import br.com.fpnbr.springbootrestfulapi.repositories.UsuarioRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,5 +41,10 @@ public class ApplicationConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
     }
 }
