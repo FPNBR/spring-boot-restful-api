@@ -8,11 +8,15 @@ import br.com.fpnbr.springbootrestfulapi.repositories.TelefoneRepository;
 import br.com.fpnbr.springbootrestfulapi.repositories.UsuarioRepository;
 import br.com.fpnbr.springbootrestfulapi.services.TelefoneService;
 import br.com.fpnbr.springbootrestfulapi.services.UsuarioService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/usuario")
@@ -44,6 +48,11 @@ public class UsuarioController {
     public ResponseEntity<JwtTokenDTO> autenticarUsuario(@RequestBody UsuarioLoginDTO usuarioLoginDTO) {
 
         return ResponseEntity.ok(usuarioService.autenticarUsuario(usuarioLoginDTO));
+    }
+
+    @PostMapping("/refresh-token")
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        usuarioService.refreshToken(request, response);
     }
 
     @GetMapping("/{id}")
