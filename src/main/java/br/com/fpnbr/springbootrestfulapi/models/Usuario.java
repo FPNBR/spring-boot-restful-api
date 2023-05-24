@@ -31,6 +31,7 @@ public class Usuario implements UserDetails {
 
     private String sobrenome;
 
+    @Column(unique = true)
     private String email;
 
     private String senha;
