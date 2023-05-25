@@ -2,9 +2,9 @@
 
  
 ## Estrutura do projeto
-![Web 1](https://github.com/FPNBR/spring-boot-mvc/blob/main/src/main/resources/images/1.png)
+![Web 1](https://github.com/FPNBR/spring-boot-restful-api/blob/main/src/main/resources/images/1.png)
 
-![Web 2](https://github.com/FPNBR/spring-boot-mvc/blob/main/src/main/resources/images/2.png)
+![Web 2](https://github.com/FPNBR/spring-boot-restful-api/blob/main/src/main/resources/images/2.png)
 
 # Tecnologias utilizadas
 
