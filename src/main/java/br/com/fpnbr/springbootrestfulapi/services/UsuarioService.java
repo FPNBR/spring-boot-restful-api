@@ -3,7 +3,7 @@ package br.com.fpnbr.springbootrestfulapi.services;
 import br.com.fpnbr.springbootrestfulapi.config.security.JwtService;
 import br.com.fpnbr.springbootrestfulapi.dto.JwtTokenDTO;
 import br.com.fpnbr.springbootrestfulapi.dto.UsuarioLoginDTO;
-import br.com.fpnbr.springbootrestfulapi.dto.UsuarioRegistroDTO;
+import br.com.fpnbr.springbootrestfulapi.dto.UsuarioDTO;
 import br.com.fpnbr.springbootrestfulapi.dto.mapper.UsuarioMapper;
 import br.com.fpnbr.springbootrestfulapi.enums.Role;
 import br.com.fpnbr.springbootrestfulapi.enums.TokenType;
@@ -18,16 +18,21 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UsuarioService {
+    private static final String API_URL = "https://viacep.com.br/ws/";
+
     @Autowired
     private UsuarioRepository usuarioRepository;
 
@@ -48,27 +53,6 @@ public class UsuarioService {
 
     @Autowired
     private UsuarioMapper usuarioMapper;
-
-    public UsuarioRegistroDTO criarUsuario(UsuarioRegistroDTO usuarioRegistroDTO) {
-        Usuario usuario = Usuario.builder()
-                .id(usuarioRegistroDTO.getId())
-                .nome(usuarioRegistroDTO.getNome())
-                .sobrenome(usuarioRegistroDTO.getSobrenome())
-                .email(usuarioRegistroDTO.getEmail())
-                .senha(passwordEncoder.encode(usuarioRegistroDTO.getSenha()))
-                .telefones(usuarioRegistroDTO.getTelefones())
-                .role(Role.USER)
-                .build();
-
-        if (usuarioRegistroDTO.getTelefones() != null) {
-            for (Telefone telefone : usuarioRegistroDTO.getTelefones()) {
-                telefone.setUsuario(usuario);
-            }
-        }
-
-        Usuario usuarioSalvo = usuarioRepository.save(usuario);
-        return usuarioMapper.ToDto(usuarioSalvo);
-    }
 
     public JwtTokenDTO autenticarUsuario(UsuarioLoginDTO usuarioLoginDTO) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(usuarioLoginDTO.getEmail(), usuarioLoginDTO.getSenha()));
@@ -132,7 +116,59 @@ public class UsuarioService {
         }
     }
 
-    public UsuarioRegistroDTO buscarUsuarioPorId(Long id) {
+    public UsuarioDTO criarUsuario(UsuarioDTO usuarioDTO) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        String cep = usuarioDTO.getCep();
+        String url = API_URL + cep + "/json/";
+
+        ResponseEntity<UsuarioDTO> response = restTemplate.getForEntity(url, UsuarioDTO.class);
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            UsuarioDTO cepResponse = response.getBody();
+            if (cepResponse != null) {
+                usuarioDTO.setLogradouro(cepResponse.getLogradouro());
+                usuarioDTO.setComplemento(cepResponse.getComplemento());
+                usuarioDTO.setBairro(cepResponse.getBairro());
+                usuarioDTO.setLocalidade(cepResponse.getLocalidade());
+                usuarioDTO.setUf(cepResponse.getUf());
+            }
+        }
+
+        Usuario usuario = Usuario.builder()
+                .id(usuarioDTO.getId())
+                .nome(usuarioDTO.getNome())
+                .sobrenome(usuarioDTO.getSobrenome())
+                .email(usuarioDTO.getEmail())
+                .senha(passwordEncoder.encode(usuarioDTO.getSenha()))
+                .cep(usuarioDTO.getCep())
+                .logradouro(usuarioDTO.getLogradouro())
+                .complemento(usuarioDTO.getComplemento())
+                .bairro(usuarioDTO.getBairro())
+                .localidade(usuarioDTO.getLocalidade())
+                .uf(usuarioDTO.getUf())
+                .telefones(usuarioDTO.getTelefones())
+                .role(Role.USER)
+                .build();
+
+        if (usuarioDTO.getTelefones() != null) {
+            for (Telefone telefone : usuarioDTO.getTelefones()) {
+                telefone.setUsuario(usuario);
+            }
+        }
+
+        Usuario usuarioSalvo = usuarioRepository.save(usuario);
+
+        return usuarioMapper.ToDto(usuarioSalvo);
+    }
+
+    public List<UsuarioDTO> buscarTodosUsuarios() {
+        List<Usuario> usuarios = usuarioRepository.findAll();
+
+        return usuarioMapper.mapList(usuarios, UsuarioDTO.class);
+    }
+
+    public UsuarioDTO buscarUsuarioPorId(Long id) {
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
 
         if (usuarioOptional.isPresent()) {
@@ -143,17 +179,17 @@ public class UsuarioService {
         throw new RuntimeException("Usuário não encontrado");
     }
 
-    public UsuarioRegistroDTO atualizarUsuario(Long id, UsuarioRegistroDTO usuarioRegistroDTO) {
+    public UsuarioDTO atualizarUsuario(Long id, UsuarioDTO usuarioDTO) {
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
         if (usuarioOptional.isPresent()) {
             Usuario usuario = usuarioOptional.get();
 
             Usuario usuarioAtualizado = Usuario.builder()
                     .id(usuario.getId())
-                    .nome(usuarioRegistroDTO.getNome())
-                    .sobrenome(usuarioRegistroDTO.getSobrenome())
-                    .email(usuarioRegistroDTO.getEmail())
-                    .senha(usuarioRegistroDTO.getSenha() != null ? passwordEncoder.encode(usuarioRegistroDTO.getSenha()) : usuario.getSenha())
+                    .nome(usuarioDTO.getNome())
+                    .sobrenome(usuarioDTO.getSobrenome())
+                    .email(usuarioDTO.getEmail())
+                    .senha(usuarioDTO.getSenha() != null ? passwordEncoder.encode(usuarioDTO.getSenha()) : usuario.getSenha())
                     .telefones(usuario.getTelefones())
                     .build();
 

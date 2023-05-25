@@ -13,7 +13,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UsuarioRegistroDTO {
+public class UsuarioDTO {
     private Long id;
 
     private String nome;
@@ -24,6 +24,18 @@ public class UsuarioRegistroDTO {
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String senha;
+
+    private String cep;
+
+    private String logradouro;
+
+    private String complemento;
+
+    private String bairro;
+
+    private String localidade;
+
+    private String uf;
 
     private List<Telefone> telefones;
 }

@@ -3,7 +3,7 @@ package br.com.fpnbr.springbootrestfulapi.controllers;
 import br.com.fpnbr.springbootrestfulapi.dto.JwtTokenDTO;
 import br.com.fpnbr.springbootrestfulapi.dto.TelefoneDTO;
 import br.com.fpnbr.springbootrestfulapi.dto.UsuarioLoginDTO;
-import br.com.fpnbr.springbootrestfulapi.dto.UsuarioRegistroDTO;
+import br.com.fpnbr.springbootrestfulapi.dto.UsuarioDTO;
 import br.com.fpnbr.springbootrestfulapi.repositories.TelefoneRepository;
 import br.com.fpnbr.springbootrestfulapi.repositories.UsuarioRepository;
 import br.com.fpnbr.springbootrestfulapi.services.TelefoneService;
@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/usuario")
@@ -38,8 +39,8 @@ public class UsuarioController {
 
 
     @PostMapping("/")
-    public ResponseEntity<UsuarioRegistroDTO> criarUsuario(@RequestBody UsuarioRegistroDTO usuarioRegistroDTO) {
-        UsuarioRegistroDTO usuarioCriado = usuarioService.criarUsuario(usuarioRegistroDTO);
+    public ResponseEntity<UsuarioDTO> criarUsuario(@RequestBody UsuarioDTO usuarioDTO) {
+        UsuarioDTO usuarioCriado = usuarioService.criarUsuario(usuarioDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(usuarioCriado);
     }
@@ -55,16 +56,21 @@ public class UsuarioController {
         usuarioService.refreshToken(request, response);
     }
 
+    @GetMapping("/")
+    public List<UsuarioDTO> buscarTodosUsuarios() {
+        return usuarioService.buscarTodosUsuarios();
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<UsuarioRegistroDTO> buscarUsuarioPorId(@PathVariable Long id) {
-        UsuarioRegistroDTO usuario = usuarioService.buscarUsuarioPorId(id);
+    public ResponseEntity<UsuarioDTO> buscarUsuarioPorId(@PathVariable Long id) {
+        UsuarioDTO usuario = usuarioService.buscarUsuarioPorId(id);
 
         return ResponseEntity.ok(usuario);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioRegistroDTO> atualizarUsuario(@PathVariable Long id, @RequestBody UsuarioRegistroDTO usuarioRegistroDTO) {
-        UsuarioRegistroDTO usuarioAtualizado = usuarioService.atualizarUsuario(id, usuarioRegistroDTO);
+    public ResponseEntity<UsuarioDTO> atualizarUsuario(@PathVariable Long id, @RequestBody UsuarioDTO usuarioDTO) {
+        UsuarioDTO usuarioAtualizado = usuarioService.atualizarUsuario(id, usuarioDTO);
 
         return ResponseEntity.ok(usuarioAtualizado);
     }

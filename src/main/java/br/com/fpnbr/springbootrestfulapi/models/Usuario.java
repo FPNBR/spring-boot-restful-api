@@ -21,10 +21,9 @@ import java.util.List;
 @NoArgsConstructor
 @Table(name = "usuario")
 @SequenceGenerator(name = "seq_usuario", sequenceName = "seq_usuario", allocationSize = 1, initialValue = 1)
-@JsonIgnoreProperties(value = {"role"}, allowGetters = true)
 public class Usuario implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_usuario")
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "seq_usuario")
     private Long id;
 
     private String nome;
@@ -35,6 +34,19 @@ public class Usuario implements UserDetails {
     private String email;
 
     private String senha;
+
+    private String cep;
+
+    private String logradouro;
+
+    private String complemento;
+
+    private String bairro;
+
+    private String localidade;
+
+    private String uf;
+
 
     @OneToMany(mappedBy = "usuario", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Telefone> telefones;
